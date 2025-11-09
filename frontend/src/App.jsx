@@ -1,35 +1,61 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import './App.css';
+import Controls from './components/Controls';
+import Transcript from './components/Transcript';
+import KeyWords from './components/KeyWords';
+import { sendText } from './services/api';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+    const [isRecording, setIsRecording] = useState(false);
+    const [transcript, setTranscript] = useState('');
+    const [keywords, setKeywords] = useState([]);
+    const [sentiment, setSentiment] = useState(0);
+    const [emotion, setEmotion] = useState('');
+  
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+function handleToggle() {
+    if (!isRecording) {
+        setIsRecording(true);
+        
+        setTimeout(() => {
+            const fakeText = "I am excited about this project!";
+            setTranscript(fakeText);
+            
+            sendText(fakeText).then(response => {
+                setSentiment(response.sentiment);
+                setEmotion(response.emotion);
+                setKeywords(response.keywords);
+            });
+        }, 2000);
+    }
+    else {
+        
+        setIsRecording(false);
+    }
 }
-
-export default App
+  
+  
+    return (
+        <div className="app">
+        <h1>Sentiment Aura</h1>
+        
+        <Controls 
+            isRecording={isRecording} 
+            onToggle={handleToggle}  
+        />
+        
+        <Transcript 
+            transcript={transcript}
+        />
+        
+        <KeyWords 
+            keywords={keywords}
+        />
+        
+        <div style={{color: 'white'}}>
+            <p>Sentiment: {sentiment}</p>
+            <p>Emotion: {emotion}</p>
+        </div>
+    </div>
+    );
+};
